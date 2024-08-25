@@ -1,5 +1,6 @@
 import { Revenue } from './definitions';
 
+// formats currency into US dollars for display
 export const formatCurrency = (amount: number) => {
   return (amount / 100).toLocaleString('en-US', {
     style: 'currency',
@@ -7,6 +8,7 @@ export const formatCurrency = (amount: number) => {
   });
 };
 
+// formats date
 export const formatDateToLocal = (
   dateStr: string,
   locale: string = 'en-US',
@@ -35,6 +37,7 @@ export const generateYAxis = (revenue: Revenue[]) => {
   return { yAxisLabels, topLabel };
 };
 
+// pagination information
 export const generatePagination = (currentPage: number, totalPages: number) => {
   // If the total number of pages is 7 or less,
   // display all pages without any ellipsis.
