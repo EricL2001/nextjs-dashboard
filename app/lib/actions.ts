@@ -47,13 +47,13 @@ const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
 export type State = {
-    errors?: {
-      customerId?: string[];
-      amount?: string[];
-      status?: string[];
-    };
-    message?: string | null;
+  errors?: {
+    customerId?: string[];
+    amount?: string[];
+    status?: string[];
   };
+  message?: string | null;
+};
 
 export async function createInvoice(prevState: State, formData: FormData) {
     const { customerId, amount, status } = CreateInvoice.parse({
@@ -85,6 +85,59 @@ export async function createInvoice(prevState: State, formData: FormData) {
     revalidatePath('/dashboard/invoices');
     redirect('/dashboard/invoices');
   }
+
+
+// export async function createInvoice(prevState: State, formData: FormData) {
+//   console.log('Starting createInvoice function');
+//   try {
+//       // Log the form data we receive
+//       console.log('Form data received:', {
+//           customerId: formData.get('customerId'),
+//           amount: formData.get('amount'),
+//           status: formData.get('status'),
+//       });
+
+//       const validatedFields = CreateInvoice.parse({
+//           customerId: formData.get('customerId'),
+//           amount: formData.get('amount'),
+//           status: formData.get('status'),
+//       });
+
+//       console.log('Validated fields:', validatedFields);
+
+//       const amountInCents = validatedFields.amount * 100;
+//       const date = new Date().toISOString().split('T')[0];
+
+//       console.log('Attempting database insertion...');
+
+//       await sql`
+//         INSERT INTO invoices (customer_id, amount, status, date)
+//         VALUES (${validatedFields.customerId}, ${amountInCents}, ${validatedFields.status}, ${date})
+//       `;
+
+//       console.log('Database insertion successful');
+//       console.log('Attempting to revalidate and redirect...');
+
+//       revalidatePath('/dashboard/invoices');
+//       redirect('/dashboard/invoices');
+
+//   } catch (error) {
+//       console.error('Error in createInvoice:', error);
+      
+//       if (error instanceof z.ZodError) {
+//           console.log('Validation error:', error.flatten().fieldErrors);
+//           return {
+//               message: 'Form validation error.',
+//               errors: error.flatten().fieldErrors
+//           };
+//       }
+
+//       return {
+//           message: `Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,
+//           errors: {}
+//       };
+//   }
+// }
 
 
   export async function updateInvoice(id: string, formData: FormData) {
