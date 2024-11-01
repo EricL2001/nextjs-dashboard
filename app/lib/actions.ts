@@ -52,39 +52,74 @@ export type State = {
     amount?: string[];
     status?: string[];
   };
-  message?: string;
+  message?: string | null;
+
 };
 
-export async function createInvoice(prevState: State, formData: FormData) {
-    const { customerId, amount, status } = CreateInvoice.parse({
-    // const validatedFields = CreateInvoice.safeParse({
-      customerId: formData.get('customerId'),
-      amount: formData.get('amount'),
-      status: formData.get('status'),
-    });
 
+export async function createInvoice(prevState: State, formData: FormData): Promise<State> {
+  const validatedFields = CreateInvoice.safeParse({
+    customerId: formData.get('customerId'),
+    amount: formData.get('amount'),
+    status: formData.get('status'),
+  })
 
-    // clean data.  prepare data for insertion into DB
-    const amountInCents = amount * 100;
-    const date = new Date().toISOString().split('T')[0];
-
-    // Insert into database
-    try {
-        await sql`
-          INSERT INTO invoices (customer_id, amount, status, date)
-          VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-        `;
-      } catch (error) {
-        // If a database error occurs, return a more specific error.
-        return {
-          message: 'Database Error: Failed to Create Invoice.',
-        };
-      }
-
-    // Revalidate the cache for the invoices page and redirect the user.
-    revalidatePath('/dashboard/invoices');
-    redirect('/dashboard/invoices');
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Create Invoice.',
+    }
   }
+
+  const { customerId, amount, status } = validatedFields.data
+  const amountInCents = amount * 100
+  const date = new Date().toISOString().split('T')[0]
+
+  try {
+    await sql`
+      INSERT INTO invoices (customer_id, amount, status, date)
+      VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
+    `
+  } catch (error) {
+    return {
+      message: 'Database Error: Failed to Create Invoice.',
+    }
+  }
+
+  revalidatePath('/dashboard/invoices')
+  redirect('/dashboard/invoices')
+}
+
+// export async function createInvoice(prevState: State, formData: FormData) {
+//     const { customerId, amount, status } = CreateInvoice.parse({
+//     // const validatedFields = CreateInvoice.safeParse({
+//       customerId: formData.get('customerId'),
+//       amount: formData.get('amount'),
+//       status: formData.get('status'),
+//     });
+
+
+//     // clean data.  prepare data for insertion into DB
+//     const amountInCents = amount * 100;
+//     const date = new Date().toISOString().split('T')[0];
+
+//     // Insert into database
+//     try {
+//         await sql`
+//           INSERT INTO invoices (customer_id, amount, status, date)
+//           VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
+//         `;
+//       } catch (error) {
+//         // If a database error occurs, return a more specific error.
+//         return {
+//           message: 'Database Error: Failed to Create Invoice.',
+//         };
+//       }
+
+//     // Revalidate the cache for the invoices page and redirect the user.
+//     revalidatePath('/dashboard/invoices');
+//     redirect('/dashboard/invoices');
+//   }
 
 
 // export async function createInvoice(prevState: State, formData: FormData) {
